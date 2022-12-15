@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  db:
+    image: postgres
+    container_name: marczyk_bi_db
+    restart: always
+    environment:
+      - POSTGRES_DB=marczyk_bi
+      - POSTGRES_USER=marczyk_bi_user
+      - POSTGRES_PASSWORD=marczyk_bi_password
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db/init-scripts.sql:/docker-entrypoint-initdb.d/scripts.sql
+#    stdin_open: true # https://github.com/docker/compose/issues/3730
+#    tty: true
+
+#  app:
+#    image: marczykscala_bi:v1
+#    container_name: marczyk_bi_app
+#    ports:
+#      - '8080:8080'
+#    stdin_open: true # https://github.com/docker/compose/issues/3730
+#    tty: true
