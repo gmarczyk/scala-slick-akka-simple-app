@@ -9,7 +9,7 @@ To launch the backend, follow these steps:
    ```sh
    git clone git@github.com:gmarczyk/scala-slick-akka-simple-app.git
    ```
-2. Cd to repository folder ./Marczyk_Scala_BI and execute
+2. Cd to repository folder and execute
    ```sh
    docker-compose build
    docker-compose up
