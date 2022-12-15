@@ -9,4 +9,4 @@ ADD . /Marczyk_Scala_BI
 
 RUN /ops/sbt/bin/sbt assembly
 
-CMD ["java", "-jar", "/Marczyk_Scala_BI/target/scala-2.12/Marczyk_Scala_BI-assembly-0.1.0-SNAPSHOT.jar"]
+CMD ["java", "-jar", "./target/scala-2.12/Marczyk_Scala_BI-assembly-0.1.0-SNAPSHOT.jar"]
