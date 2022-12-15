@@ -20,3 +20,5 @@ along with the application available at localhost:8080
 
 One should be able to retrieve sample books via 
 GET localhost:8080/books
+
+There is postman collection file in the repository 
