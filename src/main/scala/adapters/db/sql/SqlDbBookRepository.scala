@@ -1,6 +1,7 @@
 package adapters.db.sql
 
 
+import adapters.db.sql.BookTable.BookTable
 import config.ExecutorsConfig.defaultExecutionCtx
 import domain.core.{Book, BookComment}
 import domain.port.BookRepository
@@ -24,8 +25,12 @@ class SqlDbBookRepository extends BookRepository {
   }
 
   override def deleteBook(bookId: Long): Future[Int] = {
-    val deleteBookQuery = BookTable.query.filter(_.id === bookId).delete
-    postgresDb.run(deleteBookQuery).map(r => r)
+    val deleteBookWithComments = for {
+      c <- CommentTable.query.filter(_.bookId === bookId).delete
+      b <- BookTable.query.filter(_.id === bookId).delete
+    } yield (c, b)
+
+    postgresDb.run(deleteBookWithComments.transactionally).map(r => r._2)
   }
 
   /**
@@ -85,6 +90,7 @@ object CommentTable {
     def value = column[String]("value")
 
     def bookId = column[Long]("book_id")
+    def bookFk = foreignKey("fk_comments_book", bookId, BookTable.query)(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
     override def * = (id, value, bookId) <> (BookComment.tupled, BookComment.unapply)
   }

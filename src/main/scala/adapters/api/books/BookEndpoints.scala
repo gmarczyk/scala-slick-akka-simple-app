@@ -4,7 +4,7 @@ import adapters.api.books.request.{AddBookRequest, AddCommentRequest, DeleteBook
 import adapters.api.books.response.ListBooksResponseBuilder
 import adapters.db.sql.SqlDbBookRepository
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.{as, complete, concat, entity, get, onComplete, path, pathPrefix, post}
+import akka.http.scaladsl.server.Directives.{as, complete, concat, delete, entity, get, onComplete, path, pathPrefix, post, put}
 import akka.http.scaladsl.server.Route
 import de.heikoseeberger.akkahttpjackson.JacksonSupport
 import domain._
@@ -24,42 +24,34 @@ object BookEndpoints extends JacksonSupport {
   val route: Route = {
     pathPrefix("books") {
       concat(
-        path("add") {
-          post {
-            entity(as[AddBookRequest]) {
-              request => {
-                handleResult(addBookUseCase.addBook(request.title, request.author, request.isbn, request.rating))
-              }
+        post {
+          entity(as[AddBookRequest]) {
+            request => {
+              handleResult(addBookUseCase.addBook(request.title, request.author, request.isbn, request.rating))
             }
           }
         },
-        path("update") {
-          post {
-            entity(as[UpdateBookRequest]) {
-              request => {
-                handleResult(updateBookUseCase.updateBook(request.id, request.title, request.author, request.isbn, request.rating))
-              }
+        put {
+          entity(as[UpdateBookRequest]) {
+            request => {
+              handleResult(updateBookUseCase.updateBook(request.id, request.title, request.author, request.isbn, request.rating))
             }
           }
         },
-        path("delete") {
-          post {
-            entity(as[DeleteBookRequest]) {
-              request => {
-                handleResult(deleteBookUseCase.deleteBook(request.id))
-              }
+        delete {
+          entity(as[DeleteBookRequest]) {
+            request => {
+              handleResult(deleteBookUseCase.deleteBook(request.id))
             }
           }
         },
-        path("list") {
-          get {
-            onComplete(listBooksUseCase.listBooks()) {
-              case Success(books) => complete(StatusCodes.OK, ListBooksResponseBuilder.from(books))
-              case Failure(_) => complete(StatusCodes.InternalServerError)
-            }
+        get {
+          onComplete(listBooksUseCase.listBooks()) {
+            case Success(books) => complete(StatusCodes.OK, ListBooksResponseBuilder.from(books))
+            case Failure(_) => complete(StatusCodes.InternalServerError)
           }
         },
-        path("addComment") {
+        path("comments") {
           post {
             entity(as[AddCommentRequest]) { request =>
               handleResult(addCommentUseCase.addComment(request.bookId, request.comment))
@@ -73,7 +65,7 @@ object BookEndpoints extends JacksonSupport {
   def handleResult(result: Either[String, Future[Int]]) = {
     result match {
       case Left(error) => complete(StatusCodes.BadRequest, error)
-      case Right(value) => onComplete(value) {
+      case Right(future) => onComplete(future) {
         case Success(_) => complete(StatusCodes.OK)
         case Failure(_) => complete(StatusCodes.InternalServerError)
       }
